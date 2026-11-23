@@ -58,6 +58,17 @@ export const MODULES: ModuleMeta[] = [
     metrics: ["检查点总数", "已确认检查点", "今日创建"],
   },
   {
+    key: "start_verify",
+    name: "接入起点核验",
+    entity: "核验单",
+    desc: "为无断点分区核验有证据的续采起点，缺证分区不得按零恢复",
+    fields: ["分区标识", "起点证据类型", "最早可读位置", "未证实范围", "核验说明"],
+    statuses: ["待核验", "已核验", "缺证据", "续采中"],
+    actions: ["执行核验", "发起续采"],
+    actionTargets: {"执行核验": "已核验", "发起续采": "续采中"},
+    metrics: ["核验单总数", "已核验分区", "续采中分区"],
+  },
+  {
     key: "message_parser",
     name: "消息解析器",
     entity: "解析模板",

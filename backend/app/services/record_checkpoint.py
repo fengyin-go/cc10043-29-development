@@ -23,6 +23,25 @@ class RecordCheckpointService(BaseModuleService):
 
     # ---- 业务扩展：断点记录与恢复 ----
 
+    def run_action(self, entry_id: int, action: str) -> tuple[dict[str, Any] | None, str]:
+        """确认/废弃检查点后，同步接入起点核验的有效边界。"""
+        entry, message = super().run_action(entry_id, action)
+        if entry is not None and action in ("确认检查点", "废弃检查点"):
+            refreshed = self._refresh_start_verify(entry)
+            if refreshed and action == "确认检查点":
+                message += f"；已向 {refreshed} 张核验单补充有效边界"
+        return entry, message
+
+    @staticmethod
+    def _refresh_start_verify(entry: dict[str, Any]) -> int:
+        """把检查点状态变化通知给接入起点核验，返回受影响的核验单数量。"""
+        from app.services import service_for
+        verifier = service_for("start_verify")
+        if verifier is None or not hasattr(verifier, "refresh_partition"):
+            return 0
+        partition = str(entry.get("关联接入任务", ""))
+        return len(verifier.refresh_partition(partition))
+
     def create_checkpoint(self, task_name: str, point_type: str, point_value: str) -> dict[str, Any]:
         """创建新的检查点记录。"""
         rows = store.rows(self.MODULE)

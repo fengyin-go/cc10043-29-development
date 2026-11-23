@@ -11,7 +11,7 @@
 .
 ├── frontend/                 Vue 3 + Vite + TypeScript 前端
 │   ├── src/views/WorkbenchView.vue|tsx  全部模块共享工作台
-│   ├── src/data/modules.ts              18个业务模块配置
+│   ├── src/data/modules.ts              21个业务模块配置
 │   ├── src/api/              统一请求封装
 │   └── vite.config.ts        dev server 配置（open: false）
 ├── backend/                  FastAPI（Python） 后端
@@ -55,6 +55,7 @@ npm run dev
 | 偏移量管理 | `offset_manager` | 偏移量记录 | 消费组、Topic/Queue、分区/分片 |
 | API调用调度 | `api_scheduler` | 调用计划 | 计划名称、关联API、Cron表达式 |
 | 记录检查点 | `record_checkpoint` | 检查点 | 关联接入任务、检查点类型、检查点值 |
+| 接入起点核验 | `start_verify` | 核验单 | 分区标识、起点证据类型、最早可读位置 |
 | 消息解析器 | `message_parser` | 解析模板 | 模板名称、消息格式、字段映射 |
 | 去重中心 | `dedup_center` | 去重键 | 去重键名、关联数据源、去重窗口秒数 |
 | 水位追踪 | `watermark_tracker` | 水位记录 | 数据源、水位字段、当前水位 |

@@ -23,6 +23,39 @@ class ResumePolicyService(BaseModuleService):
 
     # ---- 业务扩展：续采策略与降级行为 ----
 
+    def guarded_resume_point(self, entry_id: int, partition: str) -> dict[str, Any]:
+        """空断点场景的续采入口：先向接入起点核验索要证据，再按规则计算起点。
+
+        没有核验通过的证据时拒绝给出起点，缺证分区不能被当成已从零恢复。
+        """
+        entry = store.find(self.MODULE, entry_id)
+        if entry is None or entry.get("status") != "已启用":
+            return {"ok": False, "message": "续采规则不可用"}
+        from app.services import service_for
+        verifier = service_for("start_verify")
+        if verifier is None or not hasattr(verifier, "evidence_for"):
+            return {"ok": False, "message": "接入起点核验不可用"}
+        evidence = verifier.evidence_for(partition)
+        if not evidence.get("ok"):
+            return {"ok": False,
+                    "message": f"续采缺少起点证据：{evidence.get('reason', '未核验')}",
+                    "evidence": evidence}
+        base_from = int(evidence["read_from"])
+        start_type = entry.get("续采起点类型", "断点")
+        try:
+            step = int(str(entry.get("续采步长", "0")))
+        except ValueError:
+            step = 0
+        if start_type == "最早":
+            resume_from = int(evidence.get("fetch_from", base_from))
+        elif start_type == "偏移":
+            resume_from = max(base_from - step, 0)
+        else:
+            resume_from = base_from
+        return {"ok": True, "resume_from": resume_from, "start_type": start_type,
+                "step": step, "evidence": evidence.get("evidence", ""),
+                "unverified_range": evidence.get("unverified_range", "")}
+
     def compute_resume_point(self, entry_id: int, last_offset: int) -> dict[str, Any]:
         """根据续采策略计算恢复起点。"""
         entry = store.find(self.MODULE, entry_id)

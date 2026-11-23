@@ -7,6 +7,7 @@ from app.services.stream_source import StreamSourceService
 from app.services.offset_manager import OffsetManagerService
 from app.services.api_scheduler import ApiSchedulerService
 from app.services.record_checkpoint import RecordCheckpointService
+from app.services.start_verify import StartVerifyService
 from app.services.message_parser import MessageParserService
 from app.services.dedup_center import DedupCenterService
 from app.services.watermark_tracker import WatermarkTrackerService
@@ -29,6 +30,7 @@ SERVICES: dict[str, BaseModuleService] = {
     "offset_manager": OffsetManagerService(),
     "api_scheduler": ApiSchedulerService(),
     "record_checkpoint": RecordCheckpointService(),
+    "start_verify": StartVerifyService(),
     "message_parser": MessageParserService(),
     "dedup_center": DedupCenterService(),
     "watermark_tracker": WatermarkTrackerService(),
